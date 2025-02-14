@@ -19,9 +19,10 @@ defmodule MatplotexDemo do
         :ok
       end
 
-      def line_plot() do
+      def line_plot(opts) do
         x = [1, 2, 3, 4, 6, 6, 7]
         y = [1, 3, 4, 4, 5, 6, 7]
+        colors = [1, 3, 4, 4, 5, 6, 7]
 
         frame_width = 6
         frame_height = 6
@@ -30,9 +31,9 @@ defmodule MatplotexDemo do
         font_size = "16pt"
         title_font_size = "18pt"
         ticks = [1, 2, 3, 4, 5, 6, 7]
-
+        opts = [colors: colors] ++ opts
         x
-        |> Matplotex.plot(y)
+        |> Matplotex.plot(y, opts)
         |> Matplotex.figure(%{figsize: size, margin: margin})
         |> Matplotex.set_title("The Plot Title")
         |> Matplotex.set_xlabel("X Axis")
@@ -48,7 +49,8 @@ defmodule MatplotexDemo do
           title_font_size: title_font_size,
           x_label_font_size: font_size,
           y_label_font_size: font_size,
-          title_font_size: title_font_size
+          title_font_size: title_font_size,
+          legend_width: 0.1
         )
         |> Matplotex.show()
         |> copy()
@@ -217,18 +219,31 @@ defmodule MatplotexDemo do
       end
 
       def minscatter() do
+        IO.inspect(System.monotonic_time(:nanosecond), label: "Starting")
+        beginning = System.monotonic_time()
         x= Nx.Random.key(12) |> Nx.Random.normal(0, 1, shape: {1000}) |> elem(0) |> Nx.to_list()
         y1 = Nx.Random.key(13) |> Nx.Random.normal(0, 1, shape: {1000}) |> elem(0) |> Nx.to_list()
         y2 = Nx.Random.key(14) |> Nx.Random.normal(0, 1, shape: {1000}) |> elem(0) |> Nx.to_list()
-        x
+        plot = x
         |>Matplotex.scatter(y1, color: "#EE3377", x_label: "", y_label: "", label: "Amet")
-        |>Matplotex.scatter(x,y2, color: "#0077BB", x_label: "", y_label: "", label: "Donor", show_legend: false)
+        |>Matplotex.scatter(x,y2, color: "#0077BB", x_label: "", y_label: "", label: "Donor", show_legend: false, concurrency: 12)
+        |>Matplotex.show()
+        IO.inspect(abs(System.monotonic_time(:nanosecond)) - abs(beginning) , label: "Time taken")
+        copy(plot)
+      end
+
+      def step() do
+        x = [1, 2, 3, 4, 5]
+        y1 = [1, 4, 9, 16, 25]
+        y2 = [1, 3, 6, 10, 15]
+        x
+        |>Matplotex.step(y1, color: "#EE3377",label: "Amet")
+        |>Matplotex.step(x,y2, color: "#0077BB", x_label: "", y_label: "", label: "Donor", show_legend: false)
+        |> Matplotex.set_xticks([1, 2, 3, 4, 5])
         |>Matplotex.show()
         |>copy()
 
-
       end
-
 
       def bar() do
         categories = ["1","2", "3","4"]
@@ -264,10 +279,12 @@ defmodule MatplotexDemo do
         categories = ["apple", "banana", "fig", "avocado"]
         values1 = [22, 33, 28, 34]
         values2 = [53, 63, 59, 60]
+        values3 = [50, 60, 50, 55]
         width = 0.22
 
-        Matplotex.bar(width, values1, width, label: "Dataset1", color: "#255199")
+        Matplotex.bar(-2 * width, values1, width, label: "Dataset1", color: "#255199")
         |> Matplotex.bar(-width, values2, width, label: "Dataset2", color: "orange")
+        |> Matplotex.bar(0, values3, width, label: "Dataset3", color: "green")
         |> Matplotex.set_xticks(categories)
         |> Matplotex.figure(%{figsize: {10, 10}, margin: 0.05})
         |> Matplotex.set_title("Bar chart")
@@ -275,6 +292,20 @@ defmodule MatplotexDemo do
         |> Matplotex.set_ylabel("Y-Axis")
         |> Matplotex.hide_v_grid()
         |> Matplotex.set_ylim({0, 70})
+        |> Matplotex.show()
+        |> copy()
+      end
+      def stacked_bar() do
+        categories = ["apple", "banana", "fig", "avocado"]
+        values1 = [22, 33, 28, 34]
+        values2 = [53, 63, 59, 60]
+        values3 = [50, 60, 50, 55]
+        width = 0.3
+
+        Matplotex.bar(-0.5 * width, values1, width, label: "Dataset1", color: "#255199")
+        |> Matplotex.bar(-0.5 * width, values2, width, label: "Dataset2", color: "orange", bottom: [values1])
+        |> Matplotex.bar(-0.5 * width, values3, width, label: "Dataset3", color: "green", bottom: [values2, values1])
+        |> Matplotex.set_xticks(categories)
         |> Matplotex.show()
         |> copy()
       end
@@ -411,7 +442,7 @@ defmodule MatplotexDemo do
         x = Nx.to_list(x_nx)
         y = x_nx |> Nx.sin() |> Nx.to_list()
 
-        Matplotex.spline(x, y, x_label: "X", y_label: "Y", edge_color: "green")
+        Matplotex.spline(x, y, edge_color: "cyan")
         |> Matplotex.show()
         |> copy()
       end
@@ -420,8 +451,8 @@ defmodule MatplotexDemo do
         y1 = Nx.Random.key(12) |> Nx.Random.normal(0, 10, shape: {100}) |> elem(0) |> Nx.to_list()
         y2 = Nx.Random.key(13) |> Nx.Random.normal(0, 10, shape: {100}) |> elem(0) |> Nx.to_list()
 
-        Matplotex.spline(x, y1, x_label: "", y_label: "", edge_color: "#919D41", line_width: 3)
-        |>Matplotex.spline(x,y2, x_label: "", y_label: "", edge_color: "#008080", line_width: 3)
+        Matplotex.spline(x, y1,color: "#919D41", line_width: 3)
+        |>Matplotex.spline(x,y2,color: "#008080", line_width: 3)
         |> Matplotex.set_ylim({-30, 30})
         |> Matplotex.show()
         |> copy()
@@ -446,8 +477,8 @@ defmodule MatplotexDemo do
         y2 = Nx.Random.key(13) |> Nx.Random.normal(0, 10, shape: {100}) |> elem(0) |> Nx.to_list()
 
         x
-        |> Matplotex.plot(y1, color: "#EE3377", x_label: "", y_label: "", label: "Tarus")
-        |> Matplotex.plot(x,y2, color: "#0077BB", x_label: "", y_label: "", label: "Ipsum", show_legend: false)
+        |> Matplotex.plot(y1, color: "#EE3377",label: "Tarus")
+        |> Matplotex.plot(x,y2, color: "#0077BB",label: "Ipsum", show_legend: false)
         |> Matplotex.show()
         |> copy()
       end

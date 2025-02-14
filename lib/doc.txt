@@ -1,0 +1,101 @@
+ 
+
+A Comparison on execution time between Matplotex vs Matplotlib 
+
+Matplotex is completely inspired by matplotlib, matplotlib is completely mature and already support lot’s of cool stuffs that Matplotex can’t, despite all these the role of Matplotex is to bring the power of Elixir. Here I am showing codes to generate a scatterplot by 10000 datapoints let’s inspect the time taken for two executions  
+ 
+Python code: 
+
+before_x = datetime.now();  
+
+# Generate 10,000 random points 
+x = np.random.rand(10000) * 100  # X coordinates between 0 and 100 
+y = np.random.rand(10000) * 100  # Y coordinates between 0 and 100 
+ 
+# Create a scatter plot 
+plt.figure(figsize=(10, 6))  # Set figure size 
+plt.scatter(x, y, c=colors, s=sizes, alpha=0.6, cmap='viridis') 
+ 
+# Add title and labels 
+plt.title("Scatter Plot with 10,000 Points") 
+ 
+# Step 2: Save the plot to a BytesIO buffer 
+buf = io.BytesIO() 
+plt.savefig(buf, format="png") 
+buf.seek(0) 
+plt.close()  # Close the figure to free memory 
+after_x = datetime.now() 
+
+# Calculating the time difference 
+delta = after_x - before_x  
+print(f"Time taken to generate chart: {delta}") 
+# Step 3: Return the image as a response 
+ 
+
+INFO: Will watch for changes in these directories: ['/Users/sadique/Projects/python']  
+
+INFO: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)  
+
+INFO: Started reloader process [46864] using StatReload  
+
+INFO: Started server process [46866]  
+
+INFO: Waiting for application startup.  
+
+INFO: Application startup complete.  
+
+INFO: 127.0.0.1:54554 - "GET / HTTP/1.1"  
+
+Time taken to generate chart: 0:00:03.028154 
+ 
+
+At BigThinkCode, we are committed to solving challenges that empower developers and provide them with efficient, robust, and cutting-edge solutions. Our latest open-source release, Matplotex, is a testament to that mission. Inspired by Python’s renowned Matplotlib, Matplotex fills a critical gap in the Elixir ecosystem—bringing high-speed, scalable, and fault-tolerant graph visualization capabilities to the language.  
+
+Available now on GitHub (Matplotex Repository), this new library achieves an astonishing improvement in performance, rendering visualizations of thousands of data points in milliseconds. Whether you're working on real-time analytics, dashboards, monitoring applications, or Liveview applications, Matplotex is designed to handle demanding workloads efficiently while taking full advantage of Elixir's inherent concurrency and lightweight process model. 
+
+Our journey toward developing Matplotex began with inspiration from Python's widely popular Matplotlib, a go-to tool for data visualization. While Matplotlib provides a robust solution for Python users, our Elixir team quickly recognized a significant gap—there was no equally powerful visualization library tailored to the unique capabilities of the Elixir ecosystem. This realization marked the beginning of our mission to create Matplotex, a library that brings advanced visualization to Elixir/Phoenix LiveView while unlocking the language's exceptional concurrency and fault tolerance. 
+
+In this blog, we’ll dive deeper into what makes Matplotex revolutionary, share code snippets to demonstrate its capabilities and explain how it achieves faster data processing. 
+
+Why Matplotex? 
+
+Elixir and Phoenix excel at building highly concurrent and reliable web applications with real-time functionality, particularly through Phoenix LiveView. However, the ecosystem currently lacks a robust, native solution for server-side SVG chart generation. This often forces developers to rely on client-side JavaScript libraries, which can introduce limitations. Server-side rendering is frequently a more reliable approach and aligns with Phoenix LiveView's goal of minimizing JavaScript dependencies. 
+
+Existing visualization solutions for Elixir, while functional, often introduce administrative overhead. Native solutions generally improve infrastructure stability. While Python's Matplotlib is a popular visualization tool, it's not designed for the concurrency and fault tolerance inherent in Elixir's architecture. Matplotex aims to bridge this gap., we set out to: 
+
+Leverage Elixir’s Capabilities: Matplotex integrates seamlessly with Elixir's processes / Phoenix code, providing superior scalability and reliability for real-time systems. 
+
+Achieve Exceptional Performance: By optimizing internal algorithms and using Elixir’s concurrency features, Matplotex delivers visualizations in milliseconds. 
+
+Simplify Visualization: With an intuitive API and robust error handling, developers can focus on their data rather than worrying about visualization complexity. 
+
+Optimize Resource Utilization: The library reduces server resource consumption, making it cost-efficient and environment-friendly. 
+
+Server-Side Rendering (SSR): offers performance benefits by reducing the client's resource consumption. 
+
+Server-side SVG Generation: Matplotex enables the creation of larger, complex plots on the server, ensuring smooth performance on client-side devices with limited memory. 
+
+Efficient Concurrent Processing : Leveraging Elixir’s concurrency capabilities, Matplotex can handle multiple requests simultaneously, making it ideal for high-performance applications. 
+
+Cross-Project Compatibility : While optimized for Elixir, Matplotex can also be used by non-Elixir projects through its API integration with the Phoenix framework, broadening its potential use cases. 
+ 
+  
+
+The BEAM does not natively support the fastest graphics operations like Cairo or OpenGL because it is designed to remain lightweight and optimized for concurrency rather than raw graphical performance. As a result, handling large datasets efficiently within BEAM can be challenging. To enhance execution speed for such workloads, BEAM should leverage NIFs (Native Implemented Functions), which allow computationally intensive operations to run natively outside the Erlang VM. 
+
+While C-based NIFs have traditionally been used for this purpose, they come with risks, including potential memory corruption and crashes that can bring down the entire BEAM system. Rust, on the other hand, provides memory safety guarantees and eliminates many of the risks associated with C. This makes it a preferable choice for writing NIFs. 
+
+This is where Rustler comes into play. Rustler is a library designed for writing safe and efficient Erlang NIFs using Rust. It abstracts away much of the complexity involved in interfacing Rust with BEAM by handling boilerplate generation, automatic encoding and decoding of Erlang terms, and panic safety—ensuring that unexpected Rust panics do not propagate into the BEAM runtime. With Rustler, developers can achieve the speed benefits of native execution while maintaining the reliability and robustness expected in BEAM applications. 
+The next milestone is leveraging NIFs and Rustler to handle high-intensity execution and significantly boost system performance. While this introduces potential bottlenecks, many challenges have already been addressed up to a certain point. The next step is to architect Elixir systems in a way that seamlessly integrates with this optimized execution model. A well-designed architecture not only enhances stability but also unlocks greater scalability and efficiency, making the system far more rewarding in the long run. 
+
+ stateDiagram-v2
+    [*] --> LiveViewInit
+    LiveViewInit --> Connected: User connects
+    Connected --> ReceivingData: Data received
+    ReceivingData --> Rendering: Render UI
+    Rendering --> Connected: Update UI
+    Connected --> Disconnected: User disconnects
+    Disconnected --> [*]
+
+    DataCollection --> GraphGeneration: Process Data
+    GraphGeneration --> ReceivingData: Send Graph
